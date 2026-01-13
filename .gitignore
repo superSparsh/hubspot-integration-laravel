@@ -1,0 +1,67 @@
+# Laravel specific
+/vendor/
+/node_modules/
+/public/hot
+/public/build
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Environment files
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+
+# IDE and Editor files
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+.phpactor.json
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Testing
+/.phpunit.cache
+.phpunit.result.cache
+/coverage
+/phpunit.xml
+
+# Build artifacts
+/public/mix-manifest.json
+npm-debug.log
+yarn-error.log
+
+# Composer
+/auth.json
+composer.phar
+
+# Laravel specific
+Homestead.json
+Homestead.yaml
+.vagrant/
+
+# SSH Keys (project-specific)
+/ssh-keys/
+*.pem
+*.key
+id_rsa*
+!.gitkeep
+
+# Cache and temporary files
+*.cache
+.php_cs.cache
+.php-cs-fixer.cache
+
+# Database
+*.sqlite
+*.sqlite-journal

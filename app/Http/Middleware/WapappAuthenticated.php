@@ -18,22 +18,30 @@ class WapappAuthenticated
 
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * Requires both HubSpot connection AND WAPAPP authentication.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$this->authService->isAuthenticated()) {
-            return redirect()->route('wapapp.login')
-                ->with('error', 'Please log in to your WAPAPP account to continue.');
+        // Check HubSpot connection first
+        if (!session('hubspot_portal_id')) {
+            return redirect()->route('home')
+                ->with('error', 'Please connect your HubSpot account first.');
         }
 
-        // Share user data with all views
+        // Then check WAPAPP authentication
+        if (!$this->authService->isAuthenticated()) {
+            return redirect()->route('wapapp.login')
+                ->with('error', 'Please log in to your WAPAPP account.');
+        }
+
+        // Share data with all views
         $user = $this->authService->getUser();
         $shopDomain = $this->authService->getShopDomain();
+        $portalId = session('hubspot_portal_id');
         
         view()->share('wapappUser', $user);
         view()->share('shopDomain', $shopDomain);
+        view()->share('hubspotPortalId', $portalId);
 
         return $next($request);
     }

@@ -25,9 +25,12 @@ class DashboardController extends Controller
     {
         $user = $this->authService->getUser();
         $shopDomain = $this->authService->getShopDomain();
+        $portalId = session('hubspot_portal_id');
 
-        // Get HubSpot connection for this shop
-        $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
+        // Get HubSpot connection - look up by portal_id first, then by account_id
+        $connection = HubSpotConnection::where('hubspot_portal_id', $portalId)
+            ->orWhere('wapapp_account_id', $shopDomain)
+            ->first();
 
         // Get WAPAPP API token from connection
         $wapappToken = $connection?->wapapp_token;
@@ -48,6 +51,7 @@ class DashboardController extends Controller
             'wapappToken' => $wapappToken,
             'tokenExists' => $tokenExists,
             'triggers' => $triggers,
+            'hubspotPortalId' => $portalId,
         ]);
     }
 
@@ -61,19 +65,24 @@ class DashboardController extends Controller
         ]);
 
         $shopDomain = $this->authService->getShopDomain();
+        $portalId = session('hubspot_portal_id');
 
-        if (!$shopDomain) {
+        if (!$shopDomain || !$portalId) {
             return back()->with('error', 'Invalid session. Please log in again.');
         }
 
-        // Find or create the connection
-        $connection = HubSpotConnection::firstOrCreate(
-            ['wapapp_account_id' => $shopDomain],
-            ['status' => 'active']
-        );
+        // Find connection by portal_id or account_id
+        $connection = HubSpotConnection::where('hubspot_portal_id', $portalId)
+            ->orWhere('wapapp_account_id', $shopDomain)
+            ->first();
+
+        if (!$connection) {
+            return back()->with('error', 'HubSpot connection not found. Please reconnect.');
+        }
 
         // Update the WAPAPP token
         $connection->wapapp_token = $request->input('api_token');
+        $connection->wapapp_account_id = $shopDomain;
         $connection->save();
 
         return back()->with('success', 'API token saved successfully!');

@@ -16,19 +16,21 @@ class HubSpotAuthController extends Controller
     }
 
     /**
-     * Initiate OAuth flow
+     * Initiate OAuth flow - Step 1: Connect to HubSpot
      */
     public function connect(Request $request)
     {
-        $accountId = session('wapapp_account_id') ?? 'default';
+        // Generate a unique state for this session
+        $state = bin2hex(random_bytes(16));
+        session(['hubspot_oauth_state' => $state]);
 
-        $authData = $this->oauthService->buildAuthorizeUrl($accountId);
+        $authData = $this->oauthService->buildAuthorizeUrl($state);
 
         return redirect($authData['url']);
     }
 
     /**
-     * Handle OAuth callback
+     * Handle OAuth callback - Store HubSpot connection and redirect to WAPAPP login
      */
     public function callback(Request $request)
     {
@@ -36,18 +38,35 @@ class HubSpotAuthController extends Controller
             $code = $request->input('code');
             $state = $request->input('state');
 
-            if (!$code || !$state) {
-                return redirect('/')->with('error', 'Invalid OAuth callback');
+            if (!$code) {
+                return redirect()->route('home')->with('error', 'Invalid OAuth callback - no authorization code');
+            }
+
+            // Verify state matches
+            $expectedState = session('hubspot_oauth_state');
+            if ($state !== $expectedState) {
+                return redirect()->route('home')->with('error', 'Invalid OAuth state - possible CSRF attack');
             }
 
             // Exchange code for tokens and store connection
             $connection = $this->oauthService->exchangeCodeForToken($code, $state);
 
-            return redirect('/')
-                ->with('success', 'HubSpot connected successfully! Portal ID: ' . $connection->hubspot_portal_id);
+            // Store portal ID in session for linking with WAPAPP account
+            session([
+                'hubspot_portal_id' => $connection->hubspot_portal_id,
+                'hubspot_connection_id' => $connection->id,
+            ]);
+
+            // Clear OAuth state
+            session()->forget('hubspot_oauth_state');
+
+            // Redirect to WAPAPP login (Step 2)
+            return redirect()->route('wapapp.login')
+                ->with('success', 'HubSpot connected! Portal ID: ' . $connection->hubspot_portal_id . '. Now login with your WAPAPP account.');
+
         } catch (Exception $e) {
             logger()->error('OAuth callback failed: ' . $e->getMessage());
-            return redirect('/')->with('error', 'Failed to connect HubSpot: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Failed to connect HubSpot: ' . $e->getMessage());
         }
     }
 }

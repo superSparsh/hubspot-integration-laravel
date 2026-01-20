@@ -629,20 +629,20 @@
             </div>
         </aside>
 
-        <!-- Right side: login form -->
         <main class="login-panel">
             <header class="login-header">
                 <div class="login-stepper">
+                    <div class="step-dot" style="background:#10B981;">✓</div>
+                    <span style="color:#10B981;">HubSpot Connected</span>
+                    <div class="step-line" style="background:var(--brand-primary);"></div>
                     <div class="step-dot"></div>
                     <span>Connect WAPAPP</span>
-                    <div class="step-line"></div>
-                    <div class="step-dot step-dot-muted"></div>
-                    <span style="opacity:0.6;">Configure triggers</span>
                 </div>
 
                 <h1 class="login-title">Log in to your WAPAPP account</h1>
                 <p class="login-subtitle">
-                    Connect your existing WAPAPP workspace to HubSpot to manage triggers and WhatsApp campaigns.
+                    HubSpot Portal <strong>{{ $hubspotPortalId ?? 'Unknown' }}</strong> is connected. Now link your
+                    WAPAPP account to manage triggers.
                 </p>
             </header>
 

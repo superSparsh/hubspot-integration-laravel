@@ -8,14 +8,18 @@ use App\Http\Controllers\WapappAuthController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
-// WAPAPP Authentication Routes
+// Landing Page - Connect HubSpot First
 // ============================================
-Route::get('/', [WapappAuthController::class, 'showLoginForm'])->name('wapapp.login');
-Route::post('/login', [WapappAuthController::class, 'login'])->name('wapapp.login.post');
-Route::post('/logout', [WapappAuthController::class, 'logout'])->name('wapapp.logout');
+Route::get('/', function () {
+    // If already authenticated with both HubSpot and WAPAPP, go to dashboard
+    if (session('hubspot_portal_id') && session('wapapp_user')) {
+        return redirect()->route('dashboard');
+    }
+    return view('welcome');
+})->name('home');
 
 // ============================================
-// HubSpot OAuth Routes (Public)
+// HubSpot OAuth Routes (Step 1)
 // ============================================
 Route::prefix('integrations/hubspot')->group(function () {
     Route::get('connect', [HubSpotAuthController::class, 'connect'])->name('hubspot.connect');
@@ -23,12 +27,19 @@ Route::prefix('integrations/hubspot')->group(function () {
 });
 
 // ============================================
+// WAPAPP Authentication (Step 2 - After HubSpot)
+// ============================================
+Route::get('/wapapp/login', [WapappAuthController::class, 'showLoginForm'])->name('wapapp.login');
+Route::post('/wapapp/login', [WapappAuthController::class, 'login'])->name('wapapp.login.post');
+Route::post('/wapapp/logout', [WapappAuthController::class, 'logout'])->name('wapapp.logout');
+
+// ============================================
 // HubSpot Webhook Route (Public)
 // ============================================
 Route::post('webhooks/hubspot', [HubSpotWebhookController::class, 'handle'])->name('hubspot.webhook');
 
 // ============================================
-// Protected Routes (Require WAPAPP Authentication)
+// Protected Routes (Require both HubSpot + WAPAPP)
 // ============================================
 Route::middleware('wapapp.auth')->group(function () {
     // Dashboard

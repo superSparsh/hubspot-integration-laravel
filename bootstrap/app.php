@@ -14,6 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'wapapp.auth' => \App\Http\Middleware\WapappAuthenticated::class,
         ]);
+
+        // Exclude webhook routes from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/*',
+            'webhooks/hubspot',
+            '/webhooks/*',
+            '/webhooks/hubspot',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

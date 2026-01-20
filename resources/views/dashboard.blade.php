@@ -5,8 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HubSpot Integration - WAPAPP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #5B68E8;
+            --primary-dark: #4A56D7;
+            --success: #10B981;
+            --error: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --bg-secondary: #F9FAFB;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,364 +27,192 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, #F9FAFB 0%, #FFFFFF 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Animated background elements */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            top: -200px;
-            right: -200px;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        body::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            bottom: -150px;
-            left: -150px;
-            animation: float 15s ease-in-out infinite reverse;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            50% {
-                transform: translate(50px, 50px) scale(1.1);
-            }
+            padding: 24px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            box-shadow:
-                0 30px 90px rgba(0, 0, 0, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.5);
-            max-width: 700px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            max-width: 480px;
             width: 100%;
-            padding: 60px;
-            position: relative;
-            z-index: 1;
-            animation: slideUp 0.6s ease-out;
+            padding: 48px 40px;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* Header */
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
 
-        .logo-container {
+        .logo {
             display: inline-flex;
             align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .logo-icon {
+            font-size: 18px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            display: flex;
             gap: 12px;
-            margin-bottom: 20px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea15, #764ba215);
-            border-radius: 50px;
-            animation: glow 3s ease-in-out infinite;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        @keyframes glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
-            }
+        .alert-success {
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
         }
 
-        .logo {
-            font-size: 32px;
+        .alert-error {
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        .alert-icon {
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        /* Features */
+        .features {
+            margin: 32px 0;
+        }
+
+        .feature {
+            display: flex;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .feature:not(:last-child) {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feature-icon {
+            flex-shrink: 0;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .feature-content h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .feature-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Button */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(91, 104, 232, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-icon {
+            font-size: 18px;
+        }
+
+        /* Status Badge */
+        .status {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #ECFDF5;
+            color: var(--success);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
             animation: pulse 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        .brand {
-            font-size: 20px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        h1 {
-            font-size: 42px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2d3748, #1a202c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 12px;
-            line-height: 1.2;
-        }
-
-        .subtitle {
-            color: #718096;
-            font-size: 18px;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        /* Alert styles */
-        .alert {
-            padding: 20px 24px;
-            border-radius: 16px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            animation: slideIn 0.4s ease-out;
-            border: 1px solid;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            border-color: #28a745;
-            color: #155724;
-        }
-
-        .alert-error {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            border-color: #dc3545;
-            color: #721c24;
-        }
-
-        .alert-icon {
-            font-size: 28px;
-            flex-shrink: 0;
-            animation: bounce 1s ease-in-out;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .alert-message {
-            font-size: 15px;
-            opacity: 0.9;
-        }
-
-        /* Feature cards */
-        .features {
-            display: grid;
-            gap: 20px;
-            margin: 32px 0;
-        }
-
-        .feature-card {
-            background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
-
-        .feature-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .feature-icon {
-            font-size: 28px;
-        }
-
-        .feature-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .feature-description {
-            color: #4a5568;
-            line-height: 1.6;
-            font-size: 15px;
-        }
-
-        /* Button styles */
-        .btn-container {
-            display: flex;
-            gap: 16px;
-            margin-top: 40px;
-        }
-
-        .btn {
-            flex: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 18px 32px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 16px;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(-1px);
-        }
-
-        .btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Status badge */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 24px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-            animation: blink 2s ease-in-out infinite;
-        }
-
-        @keyframes blink {
 
             0%,
             100% {
@@ -386,19 +227,32 @@
         /* Responsive */
         @media (max-width: 640px) {
             .container {
-                padding: 40px 30px;
+                padding: 32px 24px;
             }
 
             h1 {
-                font-size: 32px;
+                font-size: 24px;
             }
 
             .subtitle {
-                font-size: 16px;
+                font-size: 15px;
             }
+        }
 
-            .btn-container {
-                flex-direction: column;
+        /* Accessibility */
+        .btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -407,77 +261,65 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo-container">
-                <span class="logo">🚀</span>
-                <span class="brand">WAPAPP × HubSpot</span>
+            <div class="logo">
+                <span class="logo-icon">🚀</span>
+                <span>WAPAPP × HubSpot</span>
             </div>
-            <h1>Welcome to Your Integration Hub</h1>
-            <p class="subtitle">Seamlessly connect HubSpot with your WhatsApp messaging platform</p>
+            <h1>Connect HubSpot</h1>
+            <p class="subtitle">Sync your HubSpot CRM with WhatsApp messaging</p>
         </div>
 
         @if (session('success'))
-            <div class="alert alert-success">
-                <span class="alert-icon">✨</span>
-                <div class="alert-content">
-                    <div class="alert-title">Success!</div>
-                    <div class="alert-message">{{ session('success') }}</div>
-                </div>
+            <div class="alert alert-success" role="alert">
+                <span class="alert-icon" aria-hidden="true">✓</span>
+                <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-error">
-                <span class="alert-icon">⚠️</span>
-                <div class="alert-content">
-                    <div class="alert-title">Connection Failed</div>
-                    <div class="alert-message">{{ session('error') }}</div>
-                </div>
+            <div class="alert alert-error" role="alert">
+                <span class="alert-icon" aria-hidden="true">✕</span>
+                <span>{{ session('error') }}</span>
             </div>
         @endif
 
         <div class="features">
-            <div class="feature-card">
-                <div class="feature-header">
-                    <span class="feature-icon">📊</span>
-                    <h3 class="feature-title">Real-Time Sync</h3>
+            <div class="feature">
+                <div class="feature-icon" aria-hidden="true">📊</div>
+                <div class="feature-content">
+                    <h3>Real-Time Sync</h3>
+                    <p>Auto-sync contacts and deals</p>
                 </div>
-                <p class="feature-description">
-                    Automatically sync your HubSpot contacts and deals with your messaging platform in real-time.
-                </p>
             </div>
 
-            <div class="feature-card">
-                <div class="feature-header">
-                    <span class="feature-icon">⚡</span>
-                    <h3 class="feature-title">Smart Triggers</h3>
+            <div class="feature">
+                <div class="feature-icon" aria-hidden="true">⚡</div>
+                <div class="feature-content">
+                    <h3>Smart Triggers</h3>
+                    <p>Automated WhatsApp workflows</p>
                 </div>
-                <p class="feature-description">
-                    Set up intelligent workflows that trigger WhatsApp messages based on HubSpot CRM events.
-                </p>
             </div>
 
-            <div class="feature-card">
-                <div class="feature-header">
-                    <span class="feature-icon">🔒</span>
-                    <h3 class="feature-title">Secure & Encrypted</h3>
+            <div class="feature">
+                <div class="feature-icon" aria-hidden="true">🔒</div>
+                <div class="feature-content">
+                    <h3>Secure Connection</h3>
+                    <p>Enterprise-grade encryption</p>
                 </div>
-                <p class="feature-description">
-                    Your data is protected with enterprise-grade encryption and secure OAuth 2.0 authentication.
-                </p>
             </div>
         </div>
 
-        <div class="btn-container">
-            <a href="{{ route('hubspot.connect') }}" class="btn btn-primary">
-                <span>🔗</span>
-                <span>Connect to HubSpot</span>
-            </a>
-        </div>
+        <a href="{{ route('hubspot.connect') }}" class="btn">
+            <span class="btn-icon" aria-hidden="true">🔗</span>
+            <span>Connect to HubSpot</span>
+        </a>
 
         @if (session('success'))
-            <div class="status-badge">
-                <span class="status-indicator"></span>
-                <span>Connected & Active</span>
+            <div class="status">
+                <div class="status-badge">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span>Connected</span>
+                </div>
             </div>
         @endif
     </div>

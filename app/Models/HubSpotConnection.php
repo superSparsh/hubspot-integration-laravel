@@ -9,6 +9,8 @@ class HubSpotConnection extends Model
 {
     use HasUuids;
 
+    protected $table = 'hubspot_connections';
+
     protected $fillable = [
         'wapapp_account_id',
         'hubspot_portal_id',

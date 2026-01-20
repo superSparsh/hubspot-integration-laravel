@@ -279,15 +279,17 @@ class TriggerController extends Controller
      */
     public function getPayloadFields(Request $request): JsonResponse
     {
-        $shopDomain = $this->authService->getShopDomain();
         $event = $request->query('event');
+        
+        // Get portal ID from session (set during HubSpot OAuth)
+        $portalId = session('hubspot_portal_id');
 
-        if (!$shopDomain || !$event) {
+        if (!$portalId || !$event) {
             return response()->json([]);
         }
 
-        // Fetch latest payload for this account + event
-        $payload = WebhookPayload::where('platform_id', $shopDomain)
+        // Fetch latest payload for this portal + event
+        $payload = WebhookPayload::where('platform_id', $portalId)
             ->where('event', $event)
             ->orderBy('created_at', 'desc')
             ->first();

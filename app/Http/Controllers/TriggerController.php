@@ -33,7 +33,7 @@ class TriggerController extends Controller
         $shopDomain = $this->authService->getShopDomain();
         
         // Get WAPAPP token
-        $connection = HubSpotConnection::where('wapapp_shop_id', $shopDomain)->first();
+        $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
         $token = $connection?->wapapp_token;
 
         if (!$token) {
@@ -115,7 +115,7 @@ class TriggerController extends Controller
         }
 
         // Get WAPAPP token
-        $connection = HubSpotConnection::where('wapapp_shop_id', $shopDomain)->first();
+        $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
         $token = $connection?->wapapp_token;
 
         if (!$token) {

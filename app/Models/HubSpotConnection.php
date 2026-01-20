@@ -19,6 +19,7 @@ class HubSpotConnection extends Model
         'expires_at',
         'scopes',
         'status',
+        'wapapp_token',
     ];
 
     protected $casts = [

@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $shopDomain = $this->authService->getShopDomain();
 
         // Get HubSpot connection for this shop
-        $connection = HubSpotConnection::where('wapapp_shop_id', $shopDomain)->first();
+        $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
 
         // Get WAPAPP API token from connection
         $wapappToken = $connection?->wapapp_token;
@@ -68,8 +68,8 @@ class DashboardController extends Controller
 
         // Find or create the connection
         $connection = HubSpotConnection::firstOrCreate(
-            ['wapapp_shop_id' => $shopDomain],
-            ['connection_status' => 'pending']
+            ['wapapp_account_id' => $shopDomain],
+            ['status' => 'active']
         );
 
         // Update the WAPAPP token

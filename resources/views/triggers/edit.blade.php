@@ -21,7 +21,9 @@
             --text-muted: #6b7280;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -46,8 +48,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .trigger-card {
@@ -98,7 +107,10 @@
             gap: 6px;
         }
 
-        .badge-pill::before { content: "✅"; font-size: 14px; }
+        .badge-pill::before {
+            content: "✅";
+            font-size: 14px;
+        }
 
         .form-layout {
             display: grid;
@@ -107,7 +119,9 @@
         }
 
         @media (max-width: 900px) {
-            .form-layout { grid-template-columns: minmax(0, 1fr); }
+            .form-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
 
         .section-card {
@@ -117,7 +131,9 @@
             padding: 18px 18px 16px;
         }
 
-        .section-card-right { background: #fffbf8; }
+        .section-card-right {
+            background: #fffbf8;
+        }
 
         .section-title {
             font-size: 15px;
@@ -129,8 +145,14 @@
             margin-bottom: 4px;
         }
 
-        .section-title::before { content: "⚡"; font-size: 16px; }
-        .section-card-right .section-title::before { content: "🔗"; }
+        .section-title::before {
+            content: "⚡";
+            font-size: 16px;
+        }
+
+        .section-card-right .section-title::before {
+            content: "🔗";
+        }
 
         .section-note {
             font-size: 13px;
@@ -145,7 +167,8 @@
             margin-bottom: 4px;
         }
 
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             background-color: #ffffff;
             border-radius: 14px;
             border: 1px solid var(--border-medium);
@@ -154,12 +177,17 @@
             transition: all 0.16s ease;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--brand-primary);
             box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.18);
         }
 
-        .tiny-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .tiny-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
 
         .phone-preview {
             position: relative;
@@ -202,7 +230,8 @@
             overflow: hidden;
         }
 
-        .phone-bubble-in, .phone-bubble-out {
+        .phone-bubble-in,
+        .phone-bubble-out {
             max-width: 88%;
             border-radius: 16px;
             padding: 6px 9px;
@@ -212,8 +241,16 @@
             word-break: break-word;
         }
 
-        .phone-bubble-in { background: #141414; align-self: flex-start; }
-        .phone-bubble-out { background: #dcf8c6; align-self: flex-end; margin-left: auto; }
+        .phone-bubble-in {
+            background: #141414;
+            align-self: flex-start;
+        }
+
+        .phone-bubble-out {
+            background: #dcf8c6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
 
         #template_preview {
             border: none;
@@ -241,12 +278,26 @@
         }
 
         @keyframes pickerPop {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .btn-outline-secondary { border-radius: 999px; font-size: 13px; }
-        .btn-outline-secondary.btn-sm { border-radius: 999px; font-size: 12px; }
+        .btn-outline-secondary {
+            border-radius: 999px;
+            font-size: 13px;
+        }
+
+        .btn-outline-secondary.btn-sm {
+            border-radius: 999px;
+            font-size: 12px;
+        }
 
         .footer-actions {
             margin-top: 28px;
@@ -266,7 +317,9 @@
             transition: 0.18s;
         }
 
-        .btn-back:hover { background: #f3f4f6; }
+        .btn-back:hover {
+            background: #f3f4f6;
+        }
 
         .save-button {
             font-weight: 600;
@@ -285,7 +338,10 @@
             transition: all 0.2s ease;
         }
 
-        .save-button::after { content: "→"; font-size: 15px; }
+        .save-button::after {
+            content: "→";
+            font-size: 15px;
+        }
 
         .save-button:hover {
             transform: translateY(-2px);
@@ -304,7 +360,9 @@
             color: var(--text-muted);
         }
 
-        .tip-box strong { color: var(--text-main); }
+        .tip-box strong {
+            color: var(--text-main);
+        }
     </style>
 </head>
 
@@ -337,7 +395,7 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="api_token" value="{{ $token }}">
-                
+
                 <div class="form-layout">
                     <!-- LEFT COLUMN: basic details -->
                     <div class="section-card">
@@ -348,8 +406,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Trigger Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="trigger_name" id="trigger_name"
-                                required value="{{ old('trigger_name', $trigger->trigger_name) }}">
+                            <input type="text" class="form-control" name="trigger_name" id="trigger_name" required
+                                value="{{ old('trigger_name', $trigger->trigger_name) }}">
                         </div>
 
                         <div class="mb-2">
@@ -357,11 +415,17 @@
                             <select class="form-select" name="event" id="event_select" required>
                                 <option value="">-- Select Event --</option>
                                 <optgroup label="Contact Events">
-                                    <option value="contact.created" {{ old('event', $trigger->event) === 'contact.created' ? 'selected' : '' }}>Contact Created</option>
-                                    <option value="contact.updated" {{ old('event', $trigger->event) === 'contact.updated' ? 'selected' : '' }}>Contact Updated</option>
+                                    <option value="contact.created"
+                                        {{ old('event', $trigger->event) === 'contact.created' ? 'selected' : '' }}>
+                                        Contact Created</option>
+                                    <option value="contact.updated"
+                                        {{ old('event', $trigger->event) === 'contact.updated' ? 'selected' : '' }}>
+                                        Contact Updated</option>
                                 </optgroup>
                                 <optgroup label="Deal Events">
-                                    <option value="deal.updated" {{ old('event', $trigger->event) === 'deal.updated' ? 'selected' : '' }}>Deal Updated</option>
+                                    <option value="deal.updated"
+                                        {{ old('event', $trigger->event) === 'deal.updated' ? 'selected' : '' }}>Deal
+                                        Updated</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -381,7 +445,8 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    <input type="hidden" name="template_name" id="template_name" value="{{ old('template_name', $trigger->template_name) }}">
+                                    <input type="hidden" name="template_name" id="template_name"
+                                        value="{{ old('template_name', $trigger->template_name) }}">
                                     <div class="tiny-text">
                                         Template list is pulled from your WAPAPP account.
                                     </div>
@@ -420,8 +485,10 @@
                             <label class="form-label">Recipient ("To") <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="text" class="form-control" name="to" id="to_input"
-                                    placeholder="e.g. @{{contact.phone}}" required value="{{ old('to', $trigger->to_field) }}">
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePicker('to_input')">Insert field</button>
+                                    placeholder="e.g. @{{ contact.phone }}" required
+                                    value="{{ old('to', $trigger->to_field) }}">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="togglePicker('to_input')">Insert field</button>
                             </div>
                             <div id="field_picker_to_input" class="field-picker d-none"></div>
                             <div class="tiny-text">
@@ -443,12 +510,13 @@
                                             <div class="col-7 position-relative">
                                                 <div class="input-group">
                                                     <input type="text" name="vars[values][]" class="form-control"
-                                                        id="{{ $rowId }}" placeholder="@{{contact.firstname}}"
+                                                        id="{{ $rowId }}" placeholder="@{{ contact.firstname }}"
                                                         value="{{ $v->var_path }}" />
                                                     <button type="button" class="btn btn-outline-secondary btn-sm"
                                                         onclick="togglePicker('{{ $rowId }}')">+</button>
                                                 </div>
-                                                <div id="field_picker_{{ $rowId }}" class="field-picker d-none"></div>
+                                                <div id="field_picker_{{ $rowId }}"
+                                                    class="field-picker d-none"></div>
                                             </div>
                                             <div class="col-1 text-end">
                                                 <button type="button" class="btn btn-outline-danger btn-sm"
@@ -458,7 +526,8 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addVariable()">+ Add Variable</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+                                onclick="addVariable()">+ Add Variable</button>
                             <p class="tiny-text">
                                 Variable names should match the placeholders defined in your WhatsApp template.
                             </p>
@@ -467,7 +536,8 @@
                         <div class="border rounded-4 p-3 mt-1" style="background:#f9fafb;font-size:12px;">
                             <div class="helper-chip tip-box">
                                 <strong>Tip:</strong> If you've changed the event type, trigger it once in HubSpot
-                                (e.g. create a test contact). We'll store the latest payload and show its fields in the picker.
+                                (e.g. create a test contact). We'll store the latest payload and show its fields in the
+                                picker.
                             </div>
                         </div>
                     </div>
@@ -491,7 +561,7 @@
         async function fetchFields(eventName) {
             if (!eventName) return;
 
-            const res = await fetch('{{ route("api.payload-fields") }}?event=' + encodeURIComponent(eventName));
+            const res = await fetch('{{ route('api.payload-fields') }}?event=' + encodeURIComponent(eventName));
             const data = await res.json();
             fieldData = data || {};
 
@@ -526,10 +596,12 @@
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'btn btn-sm btn-light d-block text-start w-100 mb-1';
-                    btn.textContent = `{{${path}}}`;
+                    btn.textContent = `@{{ $ {
+    path }}}`;
                     btn.onclick = () => {
                         const input = document.getElementById(inputId);
-                        input.value += `{{${path}}}`;
+                        input.value += `@{{ $ {
+    path }}}`;
                         picker.classList.add('d-none');
                     };
                     resultContainer.appendChild(btn);

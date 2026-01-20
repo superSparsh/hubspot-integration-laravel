@@ -56,4 +56,28 @@ class WapappMessageService
 
         return json_decode($response, true);
     }
+
+    /**
+     * Fetch templates from WAPAPP API
+     */
+    public function fetchTemplates(string $apiToken): array
+    {
+        $url = "{$this->apiUrl}/templates?api_token=" . urlencode($apiToken);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return [];
+        }
+
+        $data = json_decode($response, true);
+        return is_array($data) ? $data : [];
+    }
 }

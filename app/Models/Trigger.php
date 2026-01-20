@@ -9,13 +9,14 @@ class Trigger extends Model
 {
     protected $fillable = [
         'uuid',
-        'account_id',
+        'shop_domain',
         'event',
         'trigger_name',
         'template_uid',
         'template_name',
         'to_field',
         'api_token',
+        'integration_type',
     ];
 
     protected static function boot()

@@ -20,11 +20,14 @@ class HubSpotAuthController extends Controller
      */
     public function connect(Request $request)
     {
-        // Generate a unique state for this session
-        $state = bin2hex(random_bytes(16));
-        session(['hubspot_oauth_state' => $state]);
+        // Use a placeholder account ID - will be replaced with actual WAPAPP account after login
+        $accountId = 'pending_' . bin2hex(random_bytes(8));
+        
+        // Store our pending account ID in session for later
+        session(['pending_hubspot_account' => $accountId]);
 
-        $authData = $this->oauthService->buildAuthorizeUrl($state);
+        // Build authorize URL (the service handles state management via cache)
+        $authData = $this->oauthService->buildAuthorizeUrl($accountId);
 
         return redirect($authData['url']);
     }
@@ -42,13 +45,11 @@ class HubSpotAuthController extends Controller
                 return redirect()->route('home')->with('error', 'Invalid OAuth callback - no authorization code');
             }
 
-            // Verify state matches
-            $expectedState = session('hubspot_oauth_state');
-            if ($state !== $expectedState) {
-                return redirect()->route('home')->with('error', 'Invalid OAuth state - possible CSRF attack');
+            if (!$state) {
+                return redirect()->route('home')->with('error', 'Invalid OAuth callback - no state parameter');
             }
 
-            // Exchange code for tokens and store connection
+            // Exchange code for tokens (the service validates state via cache)
             $connection = $this->oauthService->exchangeCodeForToken($code, $state);
 
             // Store portal ID in session for linking with WAPAPP account
@@ -57,8 +58,8 @@ class HubSpotAuthController extends Controller
                 'hubspot_connection_id' => $connection->id,
             ]);
 
-            // Clear OAuth state
-            session()->forget('hubspot_oauth_state');
+            // Clear pending account from session
+            session()->forget('pending_hubspot_account');
 
             // Redirect to WAPAPP login (Step 2)
             return redirect()->route('wapapp.login')

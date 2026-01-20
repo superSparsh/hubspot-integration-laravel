@@ -15,5 +15,5 @@ Route::post('webhooks/hubspot', [HubSpotWebhookController::class, 'handle'])->na
 
 // Dashboard and Triggers (add authentication middleware as needed)
 Route::get('/', function () {
-    return view('welcome');
+    return view('dashboard');
 });

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class HubSpotWebhookVerifier
 {
-    private string $webhookSecret;
+    private ?string $webhookSecret;
 
     public function __construct()
     {
@@ -18,6 +18,11 @@ class HubSpotWebhookVerifier
      */
     public function verify(Request $request): bool
     {
+        // If no secret is configured, skip verification (for testing)
+        if (!$this->webhookSecret) {
+            return false;
+        }
+
         $signature = $request->header('X-HubSpot-Signature')
             ?? $request->header('X-HubSpot-Signature-v3');
 

@@ -417,10 +417,6 @@
                                     data-category="Contact">👤 Contact</button>
                                 <button type="button" class="btn btn-outline-secondary event-tab"
                                     data-category="Deal">💰 Deal</button>
-                                <button type="button" class="btn btn-outline-secondary event-tab"
-                                    data-category="Ticket">🎫 Ticket</button>
-                                <button type="button" class="btn btn-outline-secondary event-tab"
-                                    data-category="Company">🏢 Company</button>
                             </div>
 
                             <!-- Hidden select for form submission -->

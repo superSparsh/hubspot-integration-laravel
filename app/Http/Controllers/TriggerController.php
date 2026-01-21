@@ -8,15 +8,16 @@ use App\Models\TriggerVariable;
 use App\Models\WebhookPayload;
 use App\Services\WapappAuthService;
 use App\Services\WapappMessageService;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class TriggerController extends Controller
 {
     private WapappAuthService $authService;
+
     private WapappMessageService $wapappService;
 
     public function __construct(WapappAuthService $authService, WapappMessageService $wapappService)
@@ -31,12 +32,12 @@ class TriggerController extends Controller
     public function create(): View|RedirectResponse
     {
         $shopDomain = $this->authService->getShopDomain();
-        
+
         // Get WAPAPP token
         $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
         $token = $connection?->wapapp_token;
 
-        if (!$token) {
+        if (! $token) {
             return redirect()->route('dashboard')
                 ->with('error', 'Please set your WAPAPP API token first.');
         }
@@ -86,7 +87,7 @@ class TriggerController extends Controller
         $varValues = $request->input('vars.values', []);
 
         foreach (array_map(null, $varKeys, $varValues) as [$key, $value]) {
-            if (!empty(trim($key ?? ''))) {
+            if (! empty(trim($key ?? ''))) {
                 TriggerVariable::create([
                     'trigger_id' => $trigger->id,
                     'var_key' => $key,
@@ -111,7 +112,7 @@ class TriggerController extends Controller
             ->with('variables')
             ->first();
 
-        if (!$trigger) {
+        if (! $trigger) {
             return redirect()->route('dashboard')
                 ->with('error', 'Trigger not found.');
         }
@@ -120,7 +121,7 @@ class TriggerController extends Controller
         $connection = HubSpotConnection::where('wapapp_account_id', $shopDomain)->first();
         $token = $connection?->wapapp_token;
 
-        if (!$token) {
+        if (! $token) {
             return redirect()->route('dashboard')
                 ->with('error', 'Please set your WAPAPP API token first.');
         }
@@ -155,7 +156,7 @@ class TriggerController extends Controller
             ->where('shop_domain', $shopDomain)
             ->first();
 
-        if (!$trigger) {
+        if (! $trigger) {
             return redirect()->route('dashboard')
                 ->with('error', 'Trigger not found.');
         }
@@ -176,7 +177,7 @@ class TriggerController extends Controller
         $varValues = $request->input('vars.values', []);
 
         foreach (array_map(null, $varKeys, $varValues) as [$key, $value]) {
-            if (!empty(trim($key ?? ''))) {
+            if (! empty(trim($key ?? ''))) {
                 TriggerVariable::create([
                     'trigger_id' => $trigger->id,
                     'var_key' => $key,
@@ -200,14 +201,14 @@ class TriggerController extends Controller
             ->where('shop_domain', $shopDomain)
             ->first();
 
-        if (!$trigger) {
+        if (! $trigger) {
             return redirect()->route('dashboard')
                 ->with('error', 'Trigger not found.');
         }
 
         // Delete variables first
         TriggerVariable::where('trigger_id', $trigger->id)->delete();
-        
+
         // Delete trigger
         $trigger->delete();
 
@@ -227,18 +228,18 @@ class TriggerController extends Controller
             ->with('variables')
             ->first();
 
-        if (!$trigger) {
+        if (! $trigger) {
             return redirect()->route('dashboard')
                 ->with('error', 'Trigger not found.');
         }
 
         // Get latest webhook payload for this event
-        $payload = WebhookPayload::where('platform_id', $shopDomain)
+        $payload = WebhookPayload::where('platform_id', $trigger->account_id)
             ->where('event', $trigger->event)
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if (!$payload) {
+        if (! $payload) {
             return redirect()->route('dashboard')
                 ->with('error', 'No webhook payload found for this event. Please trigger the event in HubSpot first.');
         }
@@ -265,14 +266,14 @@ class TriggerController extends Controller
 
             if (isset($response['status']) && $response['status'] == 1) {
                 return redirect()->route('dashboard')
-                    ->with('success', 'Test message sent successfully! ID: ' . ($response['message_id'] ?? 'N/A'));
+                    ->with('success', 'Test message sent successfully! ID: '.($response['message_id'] ?? 'N/A'));
             }
 
             return redirect()->route('dashboard')
-                ->with('error', 'Message failed: ' . ($response['message'] ?? 'Unknown error'));
+                ->with('error', 'Message failed: '.($response['message'] ?? 'Unknown error'));
         } catch (\Exception $e) {
             return redirect()->route('dashboard')
-                ->with('error', 'Test failed: ' . $e->getMessage());
+                ->with('error', 'Test failed: '.$e->getMessage());
         }
     }
 
@@ -282,8 +283,8 @@ class TriggerController extends Controller
     public function getPayloadFields(Request $request): JsonResponse
     {
         $event = $request->query('event');
-        
-        if (!$event) {
+
+        if (! $event) {
             return response()->json([]);
         }
 
@@ -292,23 +293,24 @@ class TriggerController extends Controller
 
         // Try to find payload - first with portal ID, then without
         $payload = null;
-        
+
         if ($portalId) {
             $payload = WebhookPayload::where('platform_id', (string) $portalId)
                 ->where('event', $event)
                 ->orderBy('created_at', 'desc')
                 ->first();
         }
-        
+
         // Fallback: try to find any payload for this event (useful when portal ID types differ)
-        if (!$payload) {
+        if (! $payload) {
             $payload = WebhookPayload::where('event', $event)
                 ->orderBy('created_at', 'desc')
                 ->first();
         }
 
-        if (!$payload) {
+        if (! $payload) {
             logger()->info("No payload found for event: {$event}, portalId: {$portalId}");
+
             return response()->json([]);
         }
 
@@ -332,7 +334,7 @@ class TriggerController extends Controller
                 if (is_numeric($k)) {
                     $k = (int) $k;
                 }
-                if (!is_array($value) || !array_key_exists($k, $value)) {
+                if (! is_array($value) || ! array_key_exists($k, $value)) {
                     return '';
                 }
                 $value = $value[$k];
@@ -348,7 +350,7 @@ class TriggerController extends Controller
     private function extractPaths(array $data, string $prefix, array &$fields): void
     {
         foreach ($data as $key => $value) {
-            $path = $prefix === '' ? $key : $prefix . '.' . $key;
+            $path = $prefix === '' ? $key : $prefix.'.'.$key;
             if (is_array($value)) {
                 $this->extractPaths($value, $path, $fields);
             } else {

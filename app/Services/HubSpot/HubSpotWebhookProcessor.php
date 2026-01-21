@@ -20,25 +20,131 @@ class HubSpotWebhookProcessor
 
     /**
      * Determine event type from webhook payload
+     * HubSpot sends batched events - we prioritize lifecycle events over property changes
      */
     public function determineEventType(array $payload): string
     {
-        if (isset($payload[0]['subscriptionType'])) {
-            $subscriptionType = $payload[0]['subscriptionType'];
-
-            $eventMap = [
-                'contact.creation' => 'contact.created',
-                'contact.deletion' => 'contact.deleted',
-                'contact.propertyChange' => 'contact.updated',
-                'deal.creation' => 'deal.created',
-                'deal.deletion' => 'deal.deleted',
-                'deal.propertyChange' => 'deal.updated',
-            ];
-
-            return $eventMap[$subscriptionType] ?? $subscriptionType;
+        if (empty($payload)) {
+            return 'unknown';
         }
 
-        return 'unknown';
+        // Priority order: lifecycle events first, then property changes
+        $priorityOrder = [
+            'contact.creation',
+            'contact.deletion',
+            'contact.merge',
+            'contact.restore',
+            'contact.associationChange',
+            'contact.privacyDeletion',
+            'deal.creation',
+            'deal.deletion',
+            'deal.propertyChange',
+            'contact.propertyChange',
+        ];
+
+        $foundEvents = [];
+        foreach ($payload as $event) {
+            if (isset($event['subscriptionType'])) {
+                $foundEvents[] = $event['subscriptionType'];
+            }
+        }
+
+        // Find highest priority event
+        foreach ($priorityOrder as $priority) {
+            if (in_array($priority, $foundEvents)) {
+                return $this->mapEventType($priority, $payload);
+            }
+        }
+
+        // Fallback to first event
+        return $this->mapEventType($foundEvents[0] ?? 'unknown', $payload);
+    }
+
+    /**
+     * Map HubSpot subscription type to our event naming
+     */
+    private function mapEventType(string $subscriptionType, array $payload = []): string
+    {
+        // Basic event mapping
+        $eventMap = [
+            'contact.creation' => 'contact.created',
+            'contact.deletion' => 'contact.deleted',
+            'contact.merge' => 'contact.merged',
+            'contact.restore' => 'contact.restored',
+            'contact.associationChange' => 'contact.association_changed',
+            'contact.privacyDeletion' => 'contact.privacy_deleted',
+            'deal.creation' => 'deal.created',
+            'deal.deletion' => 'deal.deleted',
+            'deal.propertyChange' => 'deal.updated',
+        ];
+
+        if (isset($eventMap[$subscriptionType])) {
+            return $eventMap[$subscriptionType];
+        }
+
+        // Handle property changes with specific property names
+        if ($subscriptionType === 'contact.propertyChange') {
+            // Check for specific property changes
+            foreach ($payload as $event) {
+                if (isset($event['propertyName'])) {
+                    $propertyName = $event['propertyName'];
+                    
+                    // Map common property changes to specific events
+                    $propertyEventMap = [
+                        'email' => 'contact.email_changed',
+                        'phone' => 'contact.phone_changed',
+                        'mobilephone' => 'contact.phone_changed',
+                        'hs_whatsapp_phone_number' => 'contact.whatsapp_changed',
+                        'firstname' => 'contact.name_changed',
+                        'lastname' => 'contact.name_changed',
+                        'lifecyclestage' => 'contact.lifecycle_changed',
+                        'hs_lead_status' => 'contact.status_changed',
+                    ];
+
+                    if (isset($propertyEventMap[$propertyName])) {
+                        return $propertyEventMap[$propertyName];
+                    }
+                }
+            }
+            
+            // Generic update if no specific property match
+            return 'contact.updated';
+        }
+
+        return $subscriptionType;
+    }
+
+    /**
+     * Get all supported events for UI dropdown
+     */
+    public static function getSupportedEvents(): array
+    {
+        return [
+            'Contact Lifecycle' => [
+                'contact.created' => 'Contact Created',
+                'contact.deleted' => 'Contact Deleted',
+                'contact.merged' => 'Contact Merged',
+                'contact.restored' => 'Contact Restored',
+            ],
+            'Contact Updates' => [
+                'contact.updated' => 'Any Property Changed',
+                'contact.email_changed' => 'Email Changed',
+                'contact.phone_changed' => 'Phone Changed',
+                'contact.whatsapp_changed' => 'WhatsApp Number Changed',
+                'contact.name_changed' => 'Name Changed',
+                'contact.lifecycle_changed' => 'Lifecycle Stage Changed',
+                'contact.status_changed' => 'Lead Status Changed',
+            ],
+            'Contact Other' => [
+                'contact.association_changed' => 'Association Changed',
+                'contact.privacy_deleted' => 'Deleted for Privacy',
+            ],
+            'Deal Events' => [
+                'deal.created' => 'Deal Created',
+                'deal.deleted' => 'Deal Deleted',
+                'deal.updated' => 'Deal Updated',
+            ],
+        ];
     }
 
     /**
@@ -67,13 +173,13 @@ class HubSpotWebhookProcessor
                 logger()->warning("Failed to enrich payload: " . $e->getMessage());
                 $normalized[$objectType] = [
                     'id' => $objectId,
-                    'properties' => $this->extractPropertiesFromWebhook($rawPayload[0]),
+                    'properties' => $this->extractPropertiesFromWebhook($rawPayload),
                 ];
             }
         } else {
             $normalized[$objectType] = [
                 'id' => $objectId,
-                'properties' => $this->extractPropertiesFromWebhook($rawPayload[0]),
+                'properties' => $this->extractPropertiesFromWebhook($rawPayload),
             ];
         }
 
@@ -185,20 +291,22 @@ class HubSpotWebhookProcessor
     }
 
     /**
-     * Extract properties from webhook
+     * Extract properties from webhook payload array
      */
-    private function extractPropertiesFromWebhook(array $webhookData): array
+    private function extractPropertiesFromWebhook(array $rawPayload): array
     {
         $properties = [];
 
-        if (isset($webhookData['propertyName']) && isset($webhookData['propertyValue'])) {
-            $properties[$webhookData['propertyName']] = $webhookData['propertyValue'];
-        }
+        foreach ($rawPayload as $event) {
+            if (isset($event['propertyName']) && isset($event['propertyValue'])) {
+                $properties[$event['propertyName']] = $event['propertyValue'];
+            }
 
-        if (isset($webhookData['properties'])) {
-            foreach ($webhookData['properties'] as $prop) {
-                if (isset($prop['name']) && isset($prop['value'])) {
-                    $properties[$prop['name']] = $prop['value'];
+            if (isset($event['properties'])) {
+                foreach ($event['properties'] as $prop) {
+                    if (isset($prop['name']) && isset($prop['value'])) {
+                        $properties[$prop['name']] = $prop['value'];
+                    }
                 }
             }
         }

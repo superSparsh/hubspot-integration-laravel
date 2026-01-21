@@ -412,18 +412,19 @@
                             <label class="form-label">HubSpot Event <span class="text-danger">*</span></label>
                             <select class="form-select" name="event" id="event_select" required>
                                 <option value="">-- Select Event --</option>
-                                <optgroup label="Contact Events">
-                                    <option value="contact.created"
-                                        {{ old('event') == 'contact.created' ? 'selected' : '' }}>Contact Created
-                                    </option>
-                                    <option value="contact.updated"
-                                        {{ old('event') == 'contact.updated' ? 'selected' : '' }}>Contact Updated
-                                    </option>
-                                </optgroup>
-                                <optgroup label="Deal Events">
-                                    <option value="deal.updated" {{ old('event') == 'deal.updated' ? 'selected' : '' }}>
-                                        Deal Updated</option>
-                                </optgroup>
+                                @php
+                                    $events = \App\Services\HubSpot\HubSpotWebhookProcessor::getSupportedEvents();
+                                @endphp
+                                @foreach ($events as $groupName => $groupEvents)
+                                    <optgroup label="{{ $groupName }}">
+                                        @foreach ($groupEvents as $eventValue => $eventLabel)
+                                            <option value="{{ $eventValue }}"
+                                                {{ old('event') == $eventValue ? 'selected' : '' }}>
+                                                {{ $eventLabel }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
                             </select>
                             <div class="d-flex align-items-center mt-2">
                                 <small id="webhookTip" class="text-muted me-2" style="display:none; font-size:11px">

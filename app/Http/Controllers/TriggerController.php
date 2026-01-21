@@ -283,20 +283,32 @@ class TriggerController extends Controller
     {
         $event = $request->query('event');
         
-        // Get portal ID from session (set during HubSpot OAuth)
-        $portalId = session('hubspot_portal_id');
-
-        if (!$portalId || !$event) {
+        if (!$event) {
             return response()->json([]);
         }
 
-        // Fetch latest payload for this portal + event
-        $payload = WebhookPayload::where('platform_id', $portalId)
-            ->where('event', $event)
-            ->orderBy('created_at', 'desc')
-            ->first();
+        // Get portal ID from session (set during HubSpot OAuth)
+        $portalId = session('hubspot_portal_id');
+
+        // Try to find payload - first with portal ID, then without
+        $payload = null;
+        
+        if ($portalId) {
+            $payload = WebhookPayload::where('platform_id', (string) $portalId)
+                ->where('event', $event)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+        
+        // Fallback: try to find any payload for this event (useful when portal ID types differ)
+        if (!$payload) {
+            $payload = WebhookPayload::where('event', $event)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
         if (!$payload) {
+            logger()->info("No payload found for event: {$event}, portalId: {$portalId}");
             return response()->json([]);
         }
 

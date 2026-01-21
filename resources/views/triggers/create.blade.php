@@ -408,30 +408,56 @@
                                 placeholder="e.g. New contact notification" value="{{ old('trigger_name') }}" required>
                         </div>
 
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="form-label">HubSpot Event <span class="text-danger">*</span></label>
-                            <select class="form-select" name="event" id="event_select" required>
-                                <option value="">-- Select Event --</option>
+
+                            <!-- Event Type Tabs -->
+                            <div class="btn-group w-100 mb-2" role="group">
+                                <button type="button" class="btn btn-outline-secondary event-tab active"
+                                    data-category="Contact">👤 Contact</button>
+                                <button type="button" class="btn btn-outline-secondary event-tab"
+                                    data-category="Deal">💰 Deal</button>
+                                <button type="button" class="btn btn-outline-secondary event-tab"
+                                    data-category="Ticket">🎫 Ticket</button>
+                                <button type="button" class="btn btn-outline-secondary event-tab"
+                                    data-category="Company">🏢 Company</button>
+                            </div>
+
+                            <!-- Hidden select for form submission -->
+                            <input type="hidden" name="event" id="event_input" value="{{ old('event') }}" required>
+
+                            <!-- Event Options Container -->
+                            <div id="event_options" class="border rounded-3 p-2"
+                                style="max-height:200px;overflow-y:auto;background:#fff;">
                                 @php
                                     $events = \App\Services\HubSpot\HubSpotWebhookProcessor::getSupportedEvents();
                                 @endphp
-                                @foreach ($events as $groupName => $groupEvents)
-                                    <optgroup label="{{ $groupName }}">
-                                        @foreach ($groupEvents as $eventValue => $eventLabel)
-                                            <option value="{{ $eventValue }}"
-                                                {{ old('event') == $eventValue ? 'selected' : '' }}>
-                                                {{ $eventLabel }}
-                                            </option>
+                                @foreach ($events as $category => $categoryEvents)
+                                    <div class="event-category" data-category="{{ $category }}"
+                                        style="{{ $category !== 'Contact' ? 'display:none' : '' }}">
+                                        @foreach ($categoryEvents as $eventValue => $eventLabel)
+                                            <div class="event-option p-2 rounded-2 mb-1"
+                                                data-value="{{ $eventValue }}"
+                                                style="cursor:pointer;transition:all 0.15s;"
+                                                onmouseover="this.style.background='#f0f9ff'"
+                                                onmouseout="this.classList.contains('selected') ? null : this.style.background='transparent'"
+                                                onclick="selectEvent('{{ $eventValue }}', this)">
+                                                <span style="font-size:14px;">{{ $eventLabel }}</span>
+                                            </div>
                                         @endforeach
-                                    </optgroup>
+                                    </div>
                                 @endforeach
-                            </select>
-                            <div class="d-flex align-items-center mt-2">
-                                <small id="webhookTip" class="text-muted me-2" style="display:none; font-size:11px">
-                                    ⚠️ Create a test contact or deal in HubSpot to trigger this event and load dynamic
-                                    fields.
-                                </small>
                             </div>
+
+                            <div id="selected_event_display" class="mt-2 p-2 rounded-2"
+                                style="background:#dcfce7;display:none;">
+                                <small class="text-success fw-bold">✓ Selected: <span
+                                        id="selected_event_text"></span></small>
+                            </div>
+
+                            <small id="webhookTip" class="text-muted d-block mt-2" style="display:none; font-size:11px">
+                                ⚠️ Trigger this event once in HubSpot to load dynamic fields.
+                            </small>
                         </div>
 
                         <div class="mb-1">
@@ -557,6 +583,62 @@ Select an event type to view sample payload...
 
     <script>
         let fieldData = {};
+
+        // Event Tab Switching
+        document.querySelectorAll('.event-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active tab
+                document.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show corresponding category
+                const category = this.dataset.category;
+                document.querySelectorAll('.event-category').forEach(cat => {
+                    cat.style.display = cat.dataset.category === category ? 'block' : 'none';
+                });
+            });
+        });
+
+        // Select Event
+        function selectEvent(value, element) {
+            // Clear previous selection
+            document.querySelectorAll('.event-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.style.background = 'transparent';
+            });
+
+            // Mark as selected
+            element.classList.add('selected');
+            element.style.background = '#dbeafe';
+
+            // Update hidden input
+            document.getElementById('event_input').value = value;
+
+            // Show selected display
+            const display = document.getElementById('selected_event_display');
+            display.style.display = 'block';
+            document.getElementById('selected_event_text').textContent = element.textContent.trim();
+
+            // Show tip and fetch fields
+            document.getElementById('webhookTip').style.display = 'block';
+            fetchFields(value);
+        }
+
+        // Initialize if old value exists
+        const oldEvent = document.getElementById('event_input').value;
+        if (oldEvent) {
+            const oldOption = document.querySelector('.event-option[data-value="' + oldEvent + '"]');
+            if (oldOption) {
+                // Find and activate the correct tab
+                const category = oldOption.closest('.event-category').dataset.category;
+                document.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('.event-tab[data-category="' + category + '"]').classList.add('active');
+                document.querySelectorAll('.event-category').forEach(cat => {
+                    cat.style.display = cat.dataset.category === category ? 'block' : 'none';
+                });
+                selectEvent(oldEvent, oldOption);
+            }
+        }
 
         async function fetchFields(eventName) {
             if (!eventName) return;

@@ -38,8 +38,18 @@ class HubSpotWebhookProcessor
             'contact.privacyDeletion',
             'deal.creation',
             'deal.deletion',
+            'ticket.creation',
+            'ticket.deletion',
+            'ticket.merge',
+            'ticket.restore',
+            'ticket.associationChange',
+            'company.creation',
+            'company.deletion',
+            'company.merge',
             'deal.propertyChange',
             'contact.propertyChange',
+            'ticket.propertyChange',
+            'company.propertyChange',
         ];
 
         $foundEvents = [];
@@ -67,27 +77,37 @@ class HubSpotWebhookProcessor
     {
         // Basic event mapping
         $eventMap = [
+            // Contact events
             'contact.creation' => 'contact.created',
             'contact.deletion' => 'contact.deleted',
             'contact.merge' => 'contact.merged',
             'contact.restore' => 'contact.restored',
             'contact.associationChange' => 'contact.association_changed',
             'contact.privacyDeletion' => 'contact.privacy_deleted',
+            // Deal events
             'deal.creation' => 'deal.created',
             'deal.deletion' => 'deal.deleted',
-            'deal.propertyChange' => 'deal.updated',
+            // Ticket events
+            'ticket.creation' => 'ticket.created',
+            'ticket.deletion' => 'ticket.deleted',
+            'ticket.merge' => 'ticket.merged',
+            'ticket.restore' => 'ticket.restored',
+            'ticket.associationChange' => 'ticket.association_changed',
+            // Company events
+            'company.creation' => 'company.created',
+            'company.deletion' => 'company.deleted',
+            'company.merge' => 'company.merged',
         ];
 
         if (isset($eventMap[$subscriptionType])) {
             return $eventMap[$subscriptionType];
         }
 
-        // Handle contact property changes with specific property names
+        // Handle contact property changes
         if ($subscriptionType === 'contact.propertyChange') {
             foreach ($payload as $event) {
                 if (isset($event['propertyName'])) {
                     $propertyName = $event['propertyName'];
-                    
                     $propertyEventMap = [
                         'email' => 'contact.email_changed',
                         'phone' => 'contact.phone_changed',
@@ -98,7 +118,6 @@ class HubSpotWebhookProcessor
                         'lifecyclestage' => 'contact.lifecycle_changed',
                         'hs_lead_status' => 'contact.status_changed',
                     ];
-
                     if (isset($propertyEventMap[$propertyName])) {
                         return $propertyEventMap[$propertyName];
                     }
@@ -107,77 +126,117 @@ class HubSpotWebhookProcessor
             return 'contact.updated';
         }
 
-        // Handle deal property changes with specific property names
+        // Handle deal property changes
         if ($subscriptionType === 'deal.propertyChange') {
             foreach ($payload as $event) {
                 if (isset($event['propertyName'])) {
                     $propertyName = $event['propertyName'];
-                    
-                    $dealPropertyEventMap = [
+                    $dealPropertyMap = [
                         'dealstage' => 'deal.stage_changed',
                         'pipeline' => 'deal.pipeline_changed',
                         'amount' => 'deal.amount_changed',
-                        'deal_currency_code' => 'deal.currency_changed',
                         'closedate' => 'deal.closedate_changed',
-                        'createdate' => 'deal.createdate_changed',
                         'dealname' => 'deal.name_changed',
-                        'dealtype' => 'deal.type_changed',
-                        'description' => 'deal.description_changed',
                         'hubspot_owner_id' => 'deal.owner_changed',
                     ];
-
-                    if (isset($dealPropertyEventMap[$propertyName])) {
-                        return $dealPropertyEventMap[$propertyName];
+                    if (isset($dealPropertyMap[$propertyName])) {
+                        return $dealPropertyMap[$propertyName];
                     }
                 }
             }
             return 'deal.updated';
         }
 
+        // Handle ticket property changes
+        if ($subscriptionType === 'ticket.propertyChange') {
+            foreach ($payload as $event) {
+                if (isset($event['propertyName'])) {
+                    $propertyName = $event['propertyName'];
+                    $ticketPropertyMap = [
+                        'hs_pipeline_stage' => 'ticket.stage_changed',
+                        'hs_pipeline' => 'ticket.pipeline_changed',
+                        'hs_ticket_priority' => 'ticket.priority_changed',
+                        'hs_ticket_category' => 'ticket.category_changed',
+                        'hubspot_owner_id' => 'ticket.owner_changed',
+                        'subject' => 'ticket.subject_changed',
+                        'content' => 'ticket.content_changed',
+                        'hs_resolution' => 'ticket.resolved',
+                        'closed_date' => 'ticket.closed',
+                        'hs_customer_agent_ticket_status' => 'ticket.status_changed',
+                    ];
+                    if (isset($ticketPropertyMap[$propertyName])) {
+                        return $ticketPropertyMap[$propertyName];
+                    }
+                }
+            }
+            return 'ticket.updated';
+        }
+
+        // Handle company property changes
+        if ($subscriptionType === 'company.propertyChange') {
+            foreach ($payload as $event) {
+                if (isset($event['propertyName'])) {
+                    $propertyName = $event['propertyName'];
+                    $companyPropertyMap = [
+                        'name' => 'company.name_changed',
+                        'domain' => 'company.domain_changed',
+                        'industry' => 'company.industry_changed',
+                        'annualrevenue' => 'company.revenue_changed',
+                        'numberofemployees' => 'company.size_changed',
+                        'hubspot_owner_id' => 'company.owner_changed',
+                        'lifecyclestage' => 'company.lifecycle_changed',
+                        'hs_lead_status' => 'company.status_changed',
+                    ];
+                    if (isset($companyPropertyMap[$propertyName])) {
+                        return $companyPropertyMap[$propertyName];
+                    }
+                }
+            }
+            return 'company.updated';
+        }
+
         return $subscriptionType;
     }
 
     /**
-     * Get all supported events for UI dropdown
+     * Get all supported events for UI dropdown - simplified for better UX
      */
     public static function getSupportedEvents(): array
     {
         return [
-            'Contact Lifecycle' => [
-                'contact.created' => 'Contact Created',
-                'contact.deleted' => 'Contact Deleted',
-                'contact.merged' => 'Contact Merged',
-                'contact.restored' => 'Contact Restored',
+            'Contact' => [
+                'contact.created' => '👤 Contact Created',
+                'contact.updated' => '✏️ Contact Updated (Any)',
+                'contact.deleted' => '🗑️ Contact Deleted',
+                'contact.phone_changed' => '📱 Phone Changed',
+                'contact.email_changed' => '📧 Email Changed',
             ],
-            'Contact Updates' => [
-                'contact.updated' => 'Any Property Changed',
-                'contact.email_changed' => 'Email Changed',
-                'contact.phone_changed' => 'Phone Changed',
-                'contact.whatsapp_changed' => 'WhatsApp Number Changed',
-                'contact.name_changed' => 'Name Changed',
-                'contact.lifecycle_changed' => 'Lifecycle Stage Changed',
-                'contact.status_changed' => 'Lead Status Changed',
+            'Deal' => [
+                'deal.created' => '💰 Deal Created',
+                'deal.updated' => '✏️ Deal Updated (Any)',
+                'deal.deleted' => '🗑️ Deal Deleted',
+                'deal.stage_changed' => '📊 Deal Stage Changed',
+                'deal.amount_changed' => '💵 Amount Changed',
             ],
-            'Contact Other' => [
-                'contact.association_changed' => 'Association Changed',
-                'contact.privacy_deleted' => 'Deleted for Privacy',
+            'Ticket' => [
+                'ticket.created' => '🎫 Ticket Created',
+                'ticket.updated' => '✏️ Ticket Updated (Any)',
+                'ticket.deleted' => '🗑️ Ticket Deleted',
+                'ticket.stage_changed' => '📊 Stage Changed',
+                'ticket.priority_changed' => '⚡ Priority Changed',
+                'ticket.status_changed' => '🔄 Status Changed',
+                'ticket.resolved' => '✅ Ticket Resolved',
+                'ticket.closed' => '🔒 Ticket Closed',
             ],
-            'Deal Lifecycle' => [
-                'deal.created' => 'Deal Created',
-                'deal.deleted' => 'Deal Deleted',
-            ],
-            'Deal Updates' => [
-                'deal.updated' => 'Any Deal Property Changed',
-                'deal.stage_changed' => 'Deal Stage Changed',
-                'deal.pipeline_changed' => 'Pipeline Changed',
-                'deal.amount_changed' => 'Amount Changed',
-                'deal.currency_changed' => 'Currency Changed',
-                'deal.closedate_changed' => 'Close Date Changed',
-                'deal.createdate_changed' => 'Create Date Changed',
-                'deal.name_changed' => 'Deal Name Changed',
-                'deal.type_changed' => 'Deal Type Changed',
-                'deal.description_changed' => 'Description Changed',
-                'deal.owner_changed' => 'Owner Changed',
+            'Company' => [
+                'company.created' => '🏢 Company Created',
+                'company.updated' => '✏️ Company Updated (Any)',
+                'company.deleted' => '🗑️ Company Deleted',
+                'company.merged' => '🔗 Company Merged',
+                'company.name_changed' => '📝 Name Changed',
+                'company.owner_changed' => '👤 Owner Changed',
+                'company.industry_changed' => '🏭 Industry Changed',
+                'company.revenue_changed' => '💵 Revenue Changed',
             ],
         ];
     }
@@ -200,7 +259,7 @@ class HubSpotWebhookProcessor
         $objectType = $this->getObjectTypeFromEvent($eventType);
 
         // Enrich with full object data if possible
-        if ($objectId && $accessToken && $objectType) {
+        if ($objectId && $accessToken && $objectType && $objectType !== 'unknown') {
             try {
                 $fullObject = $this->enrichPayload($objectId, $objectType, $accessToken);
                 $normalized[$objectType] = $fullObject;
@@ -212,10 +271,12 @@ class HubSpotWebhookProcessor
                 ];
             }
         } else {
-            $normalized[$objectType] = [
-                'id' => $objectId,
-                'properties' => $this->extractPropertiesFromWebhook($rawPayload),
-            ];
+            if ($objectType !== 'unknown') {
+                $normalized[$objectType] = [
+                    'id' => $objectId,
+                    'properties' => $this->extractPropertiesFromWebhook($rawPayload),
+                ];
+            }
         }
 
         return $normalized;
@@ -318,6 +379,8 @@ class HubSpotWebhookProcessor
             return 'contact';
         } elseif (str_starts_with($eventType, 'deal.')) {
             return 'deal';
+        } elseif (str_starts_with($eventType, 'ticket.')) {
+            return 'ticket';
         } elseif (str_starts_with($eventType, 'company.')) {
             return 'company';
         }
@@ -356,15 +419,11 @@ class HubSpotWebhookProcessor
     {
         $flattened = $normalized;
 
-        if (isset($normalized['contact']['properties'])) {
-            foreach ($normalized['contact']['properties'] as $key => $value) {
-                $flattened['contact'][$key] = $value;
-            }
-        }
-
-        if (isset($normalized['deal']['properties'])) {
-            foreach ($normalized['deal']['properties'] as $key => $value) {
-                $flattened['deal'][$key] = $value;
+        foreach (['contact', 'deal', 'ticket', 'company'] as $objectType) {
+            if (isset($normalized[$objectType]['properties'])) {
+                foreach ($normalized[$objectType]['properties'] as $key => $value) {
+                    $flattened[$objectType][$key] = $value;
+                }
             }
         }
 

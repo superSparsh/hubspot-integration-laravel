@@ -596,10 +596,12 @@
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'btn btn-sm btn-light d-block text-start w-100 mb-1';
-                    btn.textContent = '{{ ' + path + ' }}';
+                    const openBrace = String.fromCharCode(123, 123);
+                    const closeBrace = String.fromCharCode(125, 125);
+                    btn.textContent = openBrace + path + closeBrace;
                     btn.onclick = () => {
                         const input = document.getElementById(inputId);
-                        input.value += '{{ ' + path + ' }}';
+                        input.value += openBrace + path + closeBrace;
                         picker.classList.add('d-none');
                     };
                     resultContainer.appendChild(btn);

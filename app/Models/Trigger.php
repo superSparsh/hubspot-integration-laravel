@@ -9,6 +9,7 @@ class Trigger extends Model
 {
     protected $fillable = [
         'uuid',
+        'account_id',
         'shop_domain',
         'event',
         'trigger_name',

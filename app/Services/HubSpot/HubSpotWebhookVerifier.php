@@ -19,14 +19,14 @@ class HubSpotWebhookVerifier
     public function verify(Request $request): bool
     {
         // If no secret is configured, skip verification (for testing)
-        if (!$this->webhookSecret) {
+        if (! $this->webhookSecret) {
             return false;
         }
 
         $signature = $request->header('X-HubSpot-Signature')
             ?? $request->header('X-HubSpot-Signature-v3');
 
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
@@ -35,7 +35,7 @@ class HubSpotWebhookVerifier
         $method = $request->method();
 
         // HubSpot v3 signature format
-        $sourceString = $method . $requestUri . $payload;
+        $sourceString = $method.$requestUri.$payload;
         $expectedSignature = hash_hmac('sha256', $sourceString, $this->webhookSecret);
 
         return hash_equals($expectedSignature, $signature);

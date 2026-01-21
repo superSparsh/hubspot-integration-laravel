@@ -508,11 +508,33 @@
                             </p>
                         </div>
 
-                        <div class="border rounded-4 p-3 mt-1" style="background:#f9fafb;font-size:12px;">
-                            <div class="helper-chip tip-box mt-1">
-                                <strong>Tip:</strong> First trigger the HubSpot event once
-                                (e.g. create a test contact). We'll store the payload and show its fields
-                                in the picker so you can map them easily.
+                        <!-- Sample JSON Preview Panel -->
+                        <div class="border rounded-4 p-3 mt-2" style="background:#f9fafb;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold" style="font-size:13px;">📄 Sample Payload Data</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="toggleJsonPreview()" id="jsonToggleBtn">
+                                    Show JSON
+                                </button>
+                            </div>
+                            <div id="jsonPreviewPanel" class="d-none">
+                                <div class="mb-2 text-muted" style="font-size:11px;">
+                                    This sample data helps you understand the payload structure. Select an event above
+                                    to load data.
+                                </div>
+                                <pre id="jsonPreviewContent" class="p-2 rounded"
+                                    style="background:#1f2937;color:#22c55e;font-size:11px;max-height:250px;overflow:auto;white-space:pre-wrap;">
+Select an event type to view sample payload...
+                                </pre>
+                            </div>
+                            <div id="noDataWarning" class="d-none text-warning" style="font-size:12px;">
+                                ⚠️ No payload data yet. Create a test contact/deal in HubSpot to capture sample data.
+                            </div>
+                            <div class="helper-chip tip-box mt-2" style="font-size:11px;">
+                                <strong>Tip:</strong> Click on any field in the picker to insert it. Fields wrap in
+                                <code
+                                    style="background:#ffe4d6;padding:2px 5px;border-radius:4px;">@{{ field.name }}</code>
+                                format.
                             </div>
                         </div>
                     </div>
@@ -544,6 +566,11 @@
 
             if (Object.keys(fieldData).length === 0) {
                 console.warn("⚠️ No payload data found for event:", eventName);
+            }
+
+            // Update JSON preview panel
+            if (typeof updateJsonPreview === 'function') {
+                updateJsonPreview();
             }
         }
 
@@ -648,6 +675,36 @@
             const tip = document.getElementById('webhookTip');
             tip.style.display = eventName ? 'inline' : 'none';
         });
+
+        function toggleJsonPreview() {
+            const panel = document.getElementById('jsonPreviewPanel');
+            const btn = document.getElementById('jsonToggleBtn');
+            if (panel.classList.contains('d-none')) {
+                panel.classList.remove('d-none');
+                btn.textContent = 'Hide JSON';
+            } else {
+                panel.classList.add('d-none');
+                btn.textContent = 'Show JSON';
+            }
+        }
+
+        function updateJsonPreview() {
+            const content = document.getElementById('jsonPreviewContent');
+            const warning = document.getElementById('noDataWarning');
+
+            if (Object.keys(fieldData).length === 0) {
+                warning.classList.remove('d-none');
+                content.textContent = 'No sample data available yet...';
+            } else {
+                warning.classList.add('d-none');
+                // Format the field data nicely
+                const formatted = {};
+                Object.keys(fieldData).forEach(key => {
+                    formatted[key] = fieldData[key];
+                });
+                content.textContent = JSON.stringify(formatted, null, 2);
+            }
+        }
 
         // Initial load
         const initialEvent = document.getElementById('event_select')?.value;

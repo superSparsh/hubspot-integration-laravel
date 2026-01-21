@@ -65,11 +65,13 @@ class TriggerController extends Controller
         ]);
 
         $shopDomain = $this->authService->getShopDomain();
+        $portalId = session('hubspot_portal_id');
 
         // Create trigger
         $trigger = Trigger::create([
             'uuid' => (string) Str::uuid(),
-            'shop_domain' => $shopDomain,
+            'account_id' => $portalId, // HubSpot portal ID for webhook matching
+            'shop_domain' => $shopDomain, // WAPAPP account ID
             'event' => $request->input('event'),
             'trigger_name' => $request->input('trigger_name'),
             'template_uid' => $request->input('template_uid'),

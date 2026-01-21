@@ -91,8 +91,8 @@ class HubSpotWebhookProcessor
             ['payload' => $this->flattenForTemplates($payload)]
         );
 
-        // Find matching triggers (shop_domain stores the portal ID for HubSpot)
-        $triggers = Trigger::where('shop_domain', $portalId)
+        // Find matching triggers (account_id = HubSpot portal ID)
+        $triggers = Trigger::where('account_id', $portalId)
             ->where('event', $eventType)
             ->with('variables')
             ->get();

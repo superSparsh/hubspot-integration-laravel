@@ -1,66 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>WAPAPP · HubSpot Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
-    </script>
+@section('title', 'WAPAPP · HubSpot Dashboard')
+
+@push('head')
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+@endpush
 
+@push('styles')
     <style>
-        :root {
-            --brand-primary: #ff7a59;
-            --brand-dark: #d9552f;
-            --brand-light: #fff5f2;
-            --border-soft: #e5e7eb;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
             background:
                 radial-gradient(circle at top left, #e0f2fe 0, transparent 55%),
                 radial-gradient(circle at bottom right, #dcfce7 0, transparent 55%),
                 #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 32px 16px;
-        }
-
-        .page-container {
-            max-width: 1040px;
-            width: 100%;
-            animation: fadeIn 0.35s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .page-header {
@@ -367,224 +324,223 @@
             color: var(--text-main);
         }
     </style>
-</head>
+@endpush
 
-<body>
-    <div class="page-container">
-        <!-- HEADER -->
-        <div class="page-header">
-            <div>
-                <h2 class="page-title">
-                    Welcome back, <span>{{ $user['first_name'] ?? 'User' }}</span>!
-                </h2>
-                <p class="page-subtitle">
-                    Manage your WhatsApp triggers and settings for your HubSpot account from here.
-                </p>
+@section('content')
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">
+                Welcome back, <span>{{ $user['first_name'] ?? 'User' }}</span>!
+            </h2>
+            <p class="page-subtitle">
+                Manage your WhatsApp triggers and settings for your HubSpot account from here.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <div class="shop-chip-header">
+                <span>🎯</span>
+                <span>{{ $connection->hubspot_portal_id ?? ($shopDomain ?? 'Not Connected') }}</span>
             </div>
+            <form action="{{ route('wapapp.logout') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+        </div>
+    </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="shop-chip-header">
-                    <span>🎯</span>
-                    <span>{{ $connection->hubspot_portal_id ?? ($shopDomain ?? 'Not Connected') }}</span>
+    <!-- FLASH MESSAGES -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger mt-2" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- MAIN CARD -->
+    <div class="main-card">
+        <!-- Profile strip -->
+        @php
+            $initials = '';
+            if (!empty($user['first_name'])) {
+                $initials .= strtoupper(mb_substr($user['first_name'], 0, 1));
+            }
+            if (!empty($user['last_name'])) {
+                $initials .= strtoupper(mb_substr($user['last_name'], 0, 1));
+            }
+        @endphp
+        <div class="profile-strip">
+            <div class="profile-main">
+                <div class="profile-avatar">
+                    {{ $initials ?: 'WA' }}
                 </div>
-                <form action="{{ route('wapapp.logout') }}" method="POST" class="d-inline">
+                <div>
+                    <p class="profile-text-title">
+                        {{ ($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '') }}
+                    </p>
+                    <div class="profile-text-meta">
+                        <div>{{ $user['email'] ?? '' }}</div>
+                        @if (!empty($user['phone']))
+                            <div>{{ $user['phone'] }}</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="profile-right-chip">
+                <span>Logged in to WAPAPP</span>
+                <small>Use the tabs below to manage triggers & API token.</small>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="triggers-tab" data-bs-toggle="tab" data-bs-target="#triggers"
+                    type="button" role="tab" aria-controls="triggers" aria-selected="true">
+                    Triggers
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button"
+                    role="tab" aria-controls="settings" aria-selected="false">
+                    Settings
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content tab-wrapper" id="dashboardTabsContent">
+            <!-- SETTINGS TAB -->
+            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                <form method="POST" action="{{ route('api-token.update') }}" class="mt-2">
                     @csrf
-                    <button type="submit" class="btn-logout">Logout</button>
+                    <div class="mb-3">
+                        <label class="label" for="api_token">WAPAPP API Token</label>
+                        <input type="password" name="api_token" id="api_token" class="form-control"
+                            value="{{ $wapappToken ?? '' }}" />
+                        <div class="toggle-token notactive" id="toggle-token" onclick="toggleToken()">
+                            Show API Token
+                        </div>
+                        <div class="settings-note">
+                            Paste your API token from the WAPAPP dashboard. This is required to fetch templates and
+                            send WhatsApp messages.
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success btn-sm px-4">Save Token</button>
+                    </div>
                 </form>
             </div>
-        </div>
 
-        <!-- FLASH MESSAGES -->
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger mt-2" role="alert">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <!-- MAIN CARD -->
-        <div class="main-card">
-            <!-- Profile strip -->
-            @php
-                $initials = '';
-                if (!empty($user['first_name'])) {
-                    $initials .= strtoupper(mb_substr($user['first_name'], 0, 1));
-                }
-                if (!empty($user['last_name'])) {
-                    $initials .= strtoupper(mb_substr($user['last_name'], 0, 1));
-                }
-            @endphp
-            <div class="profile-strip">
-                <div class="profile-main">
-                    <div class="profile-avatar">
-                        {{ $initials ?: 'WA' }}
-                    </div>
-                    <div>
-                        <p class="profile-text-title">
-                            {{ ($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '') }}
-                        </p>
-                        <div class="profile-text-meta">
-                            <div>{{ $user['email'] ?? '' }}</div>
-                            @if (!empty($user['phone']))
-                                <div>{{ $user['phone'] }}</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-right-chip">
-                    <span>Logged in to WAPAPP</span>
-                    <small>Use the tabs below to manage triggers & API token.</small>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="triggers-tab" data-bs-toggle="tab" data-bs-target="#triggers"
-                        type="button" role="tab" aria-controls="triggers" aria-selected="true">
-                        Triggers
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings"
-                        type="button" role="tab" aria-controls="settings" aria-selected="false">
-                        Settings
-                    </button>
-                </li>
-            </ul>
-
-            <div class="tab-content tab-wrapper" id="dashboardTabsContent">
-                <!-- SETTINGS TAB -->
-                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-                    <form method="POST" action="{{ route('api-token.update') }}" class="mt-2">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="label" for="api_token">WAPAPP API Token</label>
-                            <input type="password" name="api_token" id="api_token" class="form-control"
-                                value="{{ $wapappToken ?? '' }}" />
-                            <div class="toggle-token notactive" id="toggle-token" onclick="toggleToken()">
-                                Show API Token
-                            </div>
-                            <div class="settings-note">
-                                Paste your API token from the WAPAPP dashboard. This is required to fetch templates and
-                                send WhatsApp messages.
+            <!-- TRIGGERS TAB -->
+            <div class="tab-pane fade show active" id="triggers" role="tabpanel" aria-labelledby="triggers-tab">
+                @if ($tokenExists)
+                    <div class="triggers-header">
+                        <div>
+                            <div class="triggers-title">Your Triggers</div>
+                            <div class="triggers-subtitle">
+                                Create WhatsApp messages for contacts, deals, and other HubSpot events.
                             </div>
                         </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-success btn-sm px-4">Save Token</button>
-                        </div>
-                    </form>
-                </div>
+                        <a href="{{ route('triggers.create') }}" class="btn btn-add-trigger">+ Add Trigger</a>
+                    </div>
 
-                <!-- TRIGGERS TAB -->
-                <div class="tab-pane fade show active" id="triggers" role="tabpanel" aria-labelledby="triggers-tab">
-                    @if ($tokenExists)
-                        <div class="triggers-header">
-                            <div>
-                                <div class="triggers-title">Your Triggers</div>
-                                <div class="triggers-subtitle">
-                                    Create WhatsApp messages for contacts, deals, and other HubSpot events.
+                    <div class="card-triggers-body">
+                        @if ($triggers->isEmpty())
+                            <div class="empty-state">
+                                <div class="empty-state-icon">✨</div>
+                                <div><strong>No triggers yet.</strong></div>
+                                <div class="mt-1">
+                                    Start by creating your first trigger using the button above.
                                 </div>
                             </div>
-                            <a href="{{ route('triggers.create') }}" class="btn btn-add-trigger">+ Add Trigger</a>
-                        </div>
-
-                        <div class="card-triggers-body">
-                            @if ($triggers->isEmpty())
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">✨</div>
-                                    <div><strong>No triggers yet.</strong></div>
-                                    <div class="mt-1">
-                                        Start by creating your first trigger using the button above.
-                                    </div>
-                                </div>
-                            @else
-                                <div class="table-wrapper p-3">
-                                    <table id="triggersTable" class="table table-hover align-middle mb-0">
-                                        <thead>
+                        @else
+                            <div class="table-wrapper p-3">
+                                <table id="triggersTable" class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Trigger Name</th>
+                                            <th>Event</th>
+                                            <th>Template Name</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($triggers as $trigger)
                                             <tr>
-                                                <th>Trigger Name</th>
-                                                <th>Event</th>
-                                                <th>Template Name</th>
-                                                <th class="text-end">Actions</th>
+                                                <td>{{ $trigger->trigger_name }}</td>
+                                                <td><code>{{ $trigger->event }}</code></td>
+                                                <td>{{ $trigger->template_name }}</td>
+                                                <td class="text-end">
+                                                    <form method="POST"
+                                                        action="{{ route('triggers.test', $trigger->id) }}"
+                                                        style="display:inline-block;">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="btn btn-outline-primary btn-table btn-table-test">Test</button>
+                                                    </form>
+
+                                                    <a href="{{ route('triggers.edit', $trigger->uuid) }}"
+                                                        class="btn btn-outline-secondary btn-table btn-table-edit ms-1">
+                                                        Edit
+                                                    </a>
+
+                                                    <button type="button" class="btn-delete-modern ms-1"
+                                                        onclick="openDeleteModal({{ $trigger->id }})">
+                                                        🗑 Delete
+                                                    </button>
+
+                                                    <form method="POST"
+                                                        action="{{ route('triggers.destroy', $trigger->id) }}"
+                                                        style="display:none;" id="deleteForm_{{ $trigger->id }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($triggers as $trigger)
-                                                <tr>
-                                                    <td>{{ $trigger->trigger_name }}</td>
-                                                    <td><code>{{ $trigger->event }}</code></td>
-                                                    <td>{{ $trigger->template_name }}</td>
-                                                    <td class="text-end">
-                                                        <form method="POST"
-                                                            action="{{ route('triggers.test', $trigger->id) }}"
-                                                            style="display:inline-block;">
-                                                            @csrf
-                                                            <button type="submit"
-                                                                class="btn btn-outline-primary btn-table btn-table-test">Test</button>
-                                                        </form>
-
-                                                        <a href="{{ route('triggers.edit', $trigger->uuid) }}"
-                                                            class="btn btn-outline-secondary btn-table btn-table-edit ms-1">
-                                                            Edit
-                                                        </a>
-
-                                                        <button type="button" class="btn-delete-modern ms-1"
-                                                            onclick="openDeleteModal({{ $trigger->id }})">
-                                                            🗑 Delete
-                                                        </button>
-
-                                                        <form method="POST"
-                                                            action="{{ route('triggers.destroy', $trigger->id) }}"
-                                                            style="display:none;"
-                                                            id="deleteForm_{{ $trigger->id }}">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-                        </div>
-                    @else
-                        <div class="alert alert-warning mt-2" role="alert">
-                            Please add your API token in the <strong>Settings</strong> tab to enable triggers.
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius:18px;">
-                    <div class="modal-header" style="border:none;">
-                        <h5 class="modal-title">Delete Trigger?</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </div>
-                    <div class="modal-body" style="color:#555;">
-                        Are you sure you want to delete this trigger?
-                        <br><strong>This action cannot be undone.</strong>
+                @else
+                    <div class="alert alert-warning mt-2" role="alert">
+                        Please add your API token in the <strong>Settings</strong> tab to enable triggers.
                     </div>
-                    <div class="modal-footer" style="border:none;">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:18px;">
+                <div class="modal-header" style="border:none;">
+                    <h5 class="modal-title">Delete Trigger?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="color:#555;">
+                    Are you sure you want to delete this trigger?
+                    <br><strong>This action cannot be undone.</strong>
+                </div>
+                <div class="modal-footer" style="border:none;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
     <script>
         function toggleToken() {
             const input = document.getElementById('api_token');
@@ -628,6 +584,4 @@
             }
         });
     </script>
-</body>
-
-</html>
+@endpush

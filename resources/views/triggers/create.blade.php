@@ -793,7 +793,7 @@ Select an event type to view sample payload...
             const treeView = document.getElementById('jsonTreeView');
             const rawView = document.getElementById('jsonRawView');
             const btn = document.getElementById('viewModeBtn');
-            
+
             isTreeView = !isTreeView;
             if (isTreeView) {
                 treeView.classList.remove('d-none');
@@ -813,7 +813,8 @@ Select an event type to view sample payload...
 
             if (Object.keys(fieldData).length === 0) {
                 warning.classList.remove('d-none');
-                treeView.innerHTML = '<div class="text-muted text-center py-3" style="font-size:12px;">No data available</div>';
+                treeView.innerHTML =
+                    '<div class="text-muted text-center py-3" style="font-size:12px;">No data available</div>';
                 rawView.textContent = 'No sample data available yet...';
             } else {
                 warning.classList.add('d-none');
@@ -826,14 +827,18 @@ Select an event type to view sample payload...
 
         function buildTreeView(data) {
             let html = '<div style="font-family:monospace;font-size:12px;">';
-            
+
             // Group by object type (contact, deal, ticket, company)
             const groups = {};
             Object.keys(data).forEach(key => {
                 const parts = key.split('.');
                 const group = parts[0];
                 if (!groups[group]) groups[group] = [];
-                groups[group].push({ key, value: data[key], subKey: parts.slice(1).join('.') || key });
+                groups[group].push({
+                    key,
+                    value: data[key],
+                    subKey: parts.slice(1).join('.') || key
+                });
             });
 
             // Render each group
@@ -845,12 +850,12 @@ Select an event type to view sample payload...
                         <span style="color:#9ca3af;font-weight:normal;font-size:10px;">(${groups[group].length} fields)</span>
                     </div>
                     <div id="group_${group}" class="ms-3" style="border-left:2px solid #e5e7eb;padding-left:12px;">`;
-                
+
                 groups[group].forEach(item => {
                     const valueType = getValueType(item.value);
                     const valueColor = getValueColor(valueType);
                     const displayValue = formatValue(item.value);
-                    
+
                     html += `<div class="py-1 px-2 rounded field-row" 
                         style="cursor:pointer;transition:all 0.15s;" 
                         onclick="copyFieldPath('${item.key}')"
@@ -862,10 +867,10 @@ Select an event type to view sample payload...
                         <span class="ms-2 copy-hint" style="color:#3b82f6;font-size:10px;opacity:0.7;">📋 click to copy</span>
                     </div>`;
                 });
-                
+
                 html += '</div></div>';
             });
-            
+
             html += '</div>';
             return html;
         }
@@ -937,12 +942,19 @@ Select an event type to view sample payload...
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'copy-toast';
-                toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn 0.3s ease;';
+                toast.style.cssText =
+                    'position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn 0.3s ease;';
                 document.body.appendChild(toast);
             }
-            toast.innerHTML = `✓ Copied: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:4px;">{{${path}}}</code>`;
+            const openBrace = String.fromCharCode(123, 123);
+            const closeBrace = String.fromCharCode(125, 125);
+            toast.innerHTML =
+                '✓ Copied: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:4px;">' + openBrace +
+                path + closeBrace + '</code>';
             toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
         }
 
         // Initial load

@@ -82,14 +82,12 @@ class HubSpotWebhookProcessor
             return $eventMap[$subscriptionType];
         }
 
-        // Handle property changes with specific property names
+        // Handle contact property changes with specific property names
         if ($subscriptionType === 'contact.propertyChange') {
-            // Check for specific property changes
             foreach ($payload as $event) {
                 if (isset($event['propertyName'])) {
                     $propertyName = $event['propertyName'];
                     
-                    // Map common property changes to specific events
                     $propertyEventMap = [
                         'email' => 'contact.email_changed',
                         'phone' => 'contact.phone_changed',
@@ -106,9 +104,34 @@ class HubSpotWebhookProcessor
                     }
                 }
             }
-            
-            // Generic update if no specific property match
             return 'contact.updated';
+        }
+
+        // Handle deal property changes with specific property names
+        if ($subscriptionType === 'deal.propertyChange') {
+            foreach ($payload as $event) {
+                if (isset($event['propertyName'])) {
+                    $propertyName = $event['propertyName'];
+                    
+                    $dealPropertyEventMap = [
+                        'dealstage' => 'deal.stage_changed',
+                        'pipeline' => 'deal.pipeline_changed',
+                        'amount' => 'deal.amount_changed',
+                        'deal_currency_code' => 'deal.currency_changed',
+                        'closedate' => 'deal.closedate_changed',
+                        'createdate' => 'deal.createdate_changed',
+                        'dealname' => 'deal.name_changed',
+                        'dealtype' => 'deal.type_changed',
+                        'description' => 'deal.description_changed',
+                        'hubspot_owner_id' => 'deal.owner_changed',
+                    ];
+
+                    if (isset($dealPropertyEventMap[$propertyName])) {
+                        return $dealPropertyEventMap[$propertyName];
+                    }
+                }
+            }
+            return 'deal.updated';
         }
 
         return $subscriptionType;
@@ -139,10 +162,22 @@ class HubSpotWebhookProcessor
                 'contact.association_changed' => 'Association Changed',
                 'contact.privacy_deleted' => 'Deleted for Privacy',
             ],
-            'Deal Events' => [
+            'Deal Lifecycle' => [
                 'deal.created' => 'Deal Created',
                 'deal.deleted' => 'Deal Deleted',
-                'deal.updated' => 'Deal Updated',
+            ],
+            'Deal Updates' => [
+                'deal.updated' => 'Any Deal Property Changed',
+                'deal.stage_changed' => 'Deal Stage Changed',
+                'deal.pipeline_changed' => 'Pipeline Changed',
+                'deal.amount_changed' => 'Amount Changed',
+                'deal.currency_changed' => 'Currency Changed',
+                'deal.closedate_changed' => 'Close Date Changed',
+                'deal.createdate_changed' => 'Create Date Changed',
+                'deal.name_changed' => 'Deal Name Changed',
+                'deal.type_changed' => 'Deal Type Changed',
+                'deal.description_changed' => 'Description Changed',
+                'deal.owner_changed' => 'Owner Changed',
             ],
         ];
     }

@@ -57,3 +57,10 @@ Route::middleware('wapapp.auth')->group(function () {
     // API Endpoints
     Route::get('/api/payload-fields', [TriggerController::class, 'getPayloadFields'])->name('api.payload-fields');
 });
+
+// ============================================
+// Public Pages (HubSpot Publishing)
+// ============================================
+Route::view('/setup-guide', 'public.setup')->name('public.setup');
+Route::view('/terms-of-service', 'public.terms')->name('public.terms');
+Route::view('/privacy-policy', 'public.privacy')->name('public.privacy');

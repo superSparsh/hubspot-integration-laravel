@@ -7,8 +7,8 @@
         <div class="col-lg-8">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h1 class="h3 fw-bold mb-1">Setup Documentation</h1>
-                    <p class="text-muted mb-0">Get started with WAPAPP for HubSpot in minutes.</p>
+                    <h1 class="h3 fw-bold mb-1">WAPAPP for HubSpot Setup Guide</h1>
+                    <p class="text-muted mb-0">Learn how to install, configure, and use the WAPAPP integration.</p>
                 </div>
                 <a href="{{ route('home') }}" class="btn btn-outline-soft">
                     <i class="me-2" data-lucide="arrow-left"></i> Back to Home
@@ -16,97 +16,96 @@
             </div>
 
             <div class="card-modern mb-5">
-                <h2 class="h5 fw-bold mb-4 text-primary">Installation Steps</h2>
-
-                <!-- Step 1 -->
-                <div class="d-flex gap-3 mb-4">
-                    <div class="flex-shrink-0">
-                        <span
-                            class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
-                            style="width: 32px; height: 32px;">1</span>
-                    </div>
-                    <div>
-                        <h3 class="h6 fw-bold mb-2">Connect HubSpot</h3>
-                        <p class="text-muted small mb-2">
-                            Click the "Connect HubSpot Account" button on the home page. You will be redirected to HubSpot
-                            to authorize our application.
-                            We require the following permissions:
-                        </p>
-                        <ul class="text-muted small mb-0">
-                            <li><code>crm.objects.contacts.read</code> - To trigger messages when contacts are
-                                created/updated.</li>
-                            <li><code>crm.objects.deals.read</code> - To trigger messages on deal stages.</li>
-                        </ul>
-                    </div>
+                <div class="mb-4">
+                    <p class="text-muted">
+                        WAPAPP allows you to send automated WhatsApp messages based on HubSpot events. Typical use cases
+                        include:
+                    </p>
+                    <ul class="text-muted">
+                        <li>Sending welcome messages to new leads.</li>
+                        <li>Notifying contacts when deal stages change.</li>
+                        <li>Automating follow-ups for form submissions.</li>
+                    </ul>
                 </div>
 
-                <!-- Step 2 -->
-                <div class="d-flex gap-3 mb-4">
-                    <div class="flex-shrink-0">
-                        <span
-                            class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
-                            style="width: 32px; height: 32px;">2</span>
-                    </div>
-                    <div>
-                        <h3 class="h6 fw-bold mb-2">Login to WAPAPP</h3>
-                        <p class="text-muted small">
-                            After authorizing HubSpot, you will be prompted to log in to your WAPAPP account. This links
-                            your HubSpot portal to your WhatsApp messaging capability.
-                        </p>
-                    </div>
+                <hr class="my-4">
+
+                <h2 class="h5 fw-bold mb-3">Install the app</h2>
+                <div class="mb-4">
+                    <p class="text-muted mb-3">
+                        Follow these steps to connect WAPAPP to your HubSpot account:
+                    </p>
+                    <ol class="text-muted mb-0">
+                        <li class="mb-2">Click the <strong>"Connect HubSpot Account"</strong> button on the WAPAPP home
+                            page.</li>
+                        <li class="mb-2">You will be redirected to HubSpot. Select your HubSpot account and click
+                            <strong>Choose Account</strong>.
+                        </li>
+                        <li class="mb-2">Review the requested permissions (Contacts, Deals) and click <strong>Connect
+                                app</strong>.</li>
+                        <li class="mb-2">You will be redirected back to the WAPAPP dashboard to complete the login
+                            process.</li>
+                    </ol>
                 </div>
 
-                <!-- Step 3 -->
-                <div class="d-flex gap-3">
-                    <div class="flex-shrink-0">
-                        <span
-                            class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
-                            style="width: 32px; height: 32px;">3</span>
-                    </div>
-                    <div>
-                        <h3 class="h6 fw-bold mb-2">Create Triggers</h3>
-                        <p class="text-muted small mb-0">
-                            Navigate to the Dashboard and click "Create New Trigger".
-                            You can set up rules like "When Deal moves to 'Closed Won', send 'Congratulations' template".
-                        </p>
-                    </div>
+                <hr class="my-4">
+
+                <h2 class="h5 fw-bold mb-3">Configure the app</h2>
+                <div class="mb-4">
+                    <p class="text-muted mb-3">
+                        Once installed, you need to set up triggers to start sending messages:
+                    </p>
+                    <ol class="text-muted mb-0">
+                        <li class="mb-2">Log in to your WAPAPP dashboard.</li>
+                        <li class="mb-2">Navigate to the <strong>Triggers</strong> section.</li>
+                        <li class="mb-2">Click <strong>"Create New Trigger"</strong>.</li>
+                        <li class="mb-2">Map a HubSpot event (e.g., "Deal Stage Changed") to a WhatsApp template.</li>
+                        <li class="mb-2">Save the trigger. It is now active and will listen for changes in HubSpot.</li>
+                    </ol>
                 </div>
-            </div>
 
-            <div class="card-modern">
-                <h2 class="h5 fw-bold mb-3">Frequently Asked Questions</h2>
+                <hr class="my-4">
 
-                <div class="accordion accordion-flush" id="accordionFlushExample">
-                    <div class="accordion-item bg-transparent">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#flush-collapseOne">
-                                <strong>How do I disconnect?</strong>
-                            </button>
-                        </h2>
-                        <div id="flush-collapseOne" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body text-muted small">
-                                You can uninstall the app directly from your HubSpot settings under "Connected Apps", or
-                                click "Logout" from the WAPAPP dashboard.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item bg-transparent">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo">
-                                <strong>Is my data secure?</strong>
-                            </button>
-                        </h2>
-                        <div id="flush-collapseTwo" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body text-muted small">
-                                Yes. We only store the OAuth tokens required to communicate with HubSpot. We do not store
-                                your contact data permanently; it is processed in real-time to send messages.
-                            </div>
-                        </div>
-                    </div>
+                <h2 class="h5 fw-bold mb-3">Use the app</h2>
+                <div class="mb-4">
+                    <p class="text-muted">
+                        The app runs automatically in the background. When a configured event occurs in HubSpot (e.g., a
+                        Contact is created), WAPAPP will automatically send the corresponding WhatsApp message to the
+                        contact's phone number.
+                    </p>
+                    <p class="text-muted">
+                        You can view logs of all sent messages in the WAPAPP <strong>Logs</strong> section.
+                    </p>
+                </div>
+
+                <hr class="my-4">
+
+                <h2 class="h5 fw-bold mb-3">Disconnect the app</h2>
+                <div class="mb-4">
+                    <p class="text-muted">
+                        To stop using WAPAPP and disconnect your account:
+                    </p>
+                    <ol class="text-muted mb-0">
+                        <li class="mb-2"><strong>Log in</strong> to your WAPAPP dashboard.</li>
+                        <li class="mb-2">Click on your profile or settings.</li>
+                        <li class="mb-2">Click <strong>"Logout"</strong> or <strong>"Disconnect HubSpot"</strong>.</li>
+                        <li class="mb-2">Confirm that you want to disconnect. This will stop all message automation.
+                        </li>
+                    </ol>
+                </div>
+
+                <hr class="my-4">
+
+                <h2 class="h5 fw-bold mb-3">Uninstall the app</h2>
+                <div class="mb-4">
+                    <p class="text-muted">
+                        To completely remove the app from your HubSpot portal, follow the instructions in this HubSpot
+                        Knowledge Base article:
+                    </p>
+                    <a href="https://knowledge.hubspot.com/integrations/connect-apps-to-hubspot#uninstall-an-app"
+                        target="_blank" class="text-primary text-decoration-underline">
+                        Uninstall an app from HubSpot
+                    </a>
                 </div>
             </div>
         </div>
